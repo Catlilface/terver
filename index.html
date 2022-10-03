@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Тервер</title>
+	<style type="text/css">
+		tr {
+			outline: solid 1px #000;
+		}
+	</style>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+<table>
+	<tr>
+		<td><h1>Формула</h1></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td><input class="type" id="Bernulli" type="radio" name="type"></td>
+		<td><label for="Bernulli">Испытания Бернулли</label></td>
+	</tr>
+	<tr>
+		<td><input class="type" id="MV" type="radio" name="type"></td>
+		<td><label for="MV">Теорема Муавра-Лапласа</label></td>
+	</tr>
+	<tr>
+		<td><input class="type" id="INT" type="radio" name="type"></td>
+		<td><label for="INT">Интегральная теорема Лапаса</label></td>
+	</tr>
+	<tr>
+		<td><input class="type" id="Poisson" type="radio" name="type"></td>
+		<td><label for="Poisson">Приближение Пуассона</label></td>
+	</tr>
+	<tr>
+		<td><h1>Данные</h1></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td><label for="n">n = </label></td>
+		<td><input type="number" id="n"></td>
+	</tr>
+	<tr>
+		<td><label for="k1">k1 = </label></td>
+		<td><input type="number" id="k1"></td>
+	</tr>
+	<tr class="k2">
+		<td><label for="k2">k2 = </label></td>
+		<td><input type="number" id="k2"></td>
+	</tr>
+	<tr>
+		<td><label for="p">p = </label></td>
+		<td><input min="0" max="1" step="0.01" type="number" id="p"></td>
+	</tr>
+	<tr>
+		<td><button id="calculate">Рассчитать</button></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td><h1>Рассчет</h1></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td><span>q = </span></td>
+		<td><span id="q"></span></td>
+	</tr>
+	<tr>
+		<td><span>sqrt(npq) = </span></td>
+		<td><span id="npq"></span></td>
+	</tr>
+	<tr>
+		<td><span>k1 - np = </span></td>
+		<td><span id="k1a"></span></td>
+	</tr>
+	<tr>
+		<td><span class="k2">k2 - np = </span></td>
+		<td><span class="k2" id="k2a"></span></td>
+	</tr>
+	<tr>
+		<td><span>phi = </span></td>
+		<td><span id="phi"></span></td>
+	</tr>
+	<tr>
+		<td><span>PHI2 = </span></td>
+		<td><span id="phi2"></span></td>
+	</tr>
+	<tr>
+		<td><span>PHI1 = </span></td>
+		<td><span id="phi1"></span></td>
+	</tr>
+	<tr>
+		<td><span>lambda = </span></td>
+		<td><span id="lambda"></span></td>
+	</tr>
+	<tr>
+		<td><span>P = </span></td>
+		<td><span id="P"></span></td>
+	</tr>
+</table>
+<script>
+	document.querySelector('#calculate').addEventListener('click', calc)
+	function calc() {
+		for (type of document.getElementsByClassName('type')) {
+			if (type.checked) {
+				method(type.id)
+			}
+		}
+	}
+	function method(m) {
+		n = parseInt(document.querySelector('#n').value)
+		k = parseInt(document.querySelector('#k1').value)
+		k2 = parseInt(document.querySelector('#k2').value)
+		p = parseFloat(document.querySelector('#p').value)
+		qO = document.querySelector('#q')
+		npqO = document.querySelector('#npq')
+		k1O = document.querySelector('#k1a')
+		k2O = document.querySelector('#k2a')
+		phiO = document.querySelector('#phi')
+		phi2O = document.querySelector('#phi2')
+		phi1O = document.querySelector('#phi1')
+		lambdaO = document.querySelector('#lambda')
+		PO = document.querySelector('#P')
+
+		q = 1 - p
+		npq = Math.sqrt(n * p * (1 - p))
+		k1mnp = k - n * p
+
+		qO.innerHTML = q.toFixed(4)
+		npqO.innerHTML = Math.sqrt(n * p * q).toFixed(4)
+		k1O.innerHTML = k1mnp.toFixed(4)
+		switch (m) {
+			case 'Bernulli':
+				PO.innerHTML = (C(n, k) * Math.pow(p, k) * Math.pow(q, n - k)).toFixed(4)
+				break;
+			case 'MV':
+				phi = phiFunction((k - n * p) / npq)
+				phiO.innerHTML = phi.toFixed(4)
+				PO.innerHTML = (phi / npq).toFixed(4)
+				break;
+			case 'Poisson':
+				lambda = n * p
+				lambdaO.innerHTML = lambda.toFixed(4)
+				PO.innerHTML = (Math.pow(lambda, k) * Math.pow(2.718281828, -lambda) / factorial(k)).toFixed(4)
+				break;
+			case 'INT':
+				k2mnp = k2 - n * p
+				k2O.innerHTML = k2mnp.toFixed(4)
+				phi2 = PHI(k2mnp / npq)
+				phi1 = PHI(k1mnp / npq)
+				phi2O.innerHTML = phi2.toFixed(4)
+				phi1O.innerHTML = phi1.toFixed(4)
+				PO.innerHTML = (phi2 - phi1).toFixed(4)
+		}
+	}
+	function C(n, k) {
+		return factorial(n) / (factorial(k) * factorial(n - k))
+	}
+	function factorial(n) {
+		return (n <= 1) ? 1 : factorial(n - 1) * n
+	}
+	function phiFunction(x) {
+		return Math.pow(2.718281828, -(x * x) / 2) / Math.sqrt(2 * 3.141592654)
+	}
+	function PHI(x) {
+		return (x > 0) ? integral(phiFunction, 0, x, 0.00001) : -integral(phiFunction, 0, -x, 0.00001)
+	}
+	function integral(f, a, b, dt) {
+		let s = 0
+		while (a < b) {
+			s += f(a) * dt
+			a += dt
+		}
+		return s - dt
+	}
+</script>
+</body>
+</html>
